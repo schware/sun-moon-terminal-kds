@@ -65,7 +65,13 @@ function Kds({ deviceId, storeId, onForget }:
       // Filtered here rather than at the API, which has no per-store query
       // yet — same reasoning as sun-moon-terminal-pos.
       const all = (await fetchOrders()).filter((o) => o.storeId === storeId)
-      setCooking(all.filter((o) => o.status === 'ACCEPTED'))
+      // The Device Server's push already targets one KDS when a menu is
+      // assigned to one — this mirrors that on the list itself, because a
+      // 15s poll or a fresh page load fetches every ACCEPTED order at the
+      // store with no filtering of its own. No assignment (null) means
+      // every KDS should see it, matching the push's own fallback.
+      setCooking(all.filter((o) =>
+        o.status === 'ACCEPTED' && (o.kdsDeviceId == null || o.kdsDeviceId === deviceId)))
       setRecent(all.filter((o) => o.status === 'PRODUCED' || o.status === 'DELIVERING' || o.status === 'COMPLETED').slice(0, 12))
       setError(null)
     } catch (e) {

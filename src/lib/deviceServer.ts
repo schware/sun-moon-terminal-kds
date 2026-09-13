@@ -33,6 +33,7 @@ export interface Order {
   amount: number
   status: OrderStatus
   acceptedBy: string | null
+  kdsDeviceId: string | null
   placedAt: string
   updatedAt: string
 }
