@@ -61,6 +61,16 @@ to a counter. See that repo's README for why.
 
 ## Not built yet
 
+- **A second KDS screen in the same kitchen finds out late.** The Device
+  Server only pushes `ACCEPTED` events to KDS
+  (`OrderEventSubscriber.audienceFor`) — there is no push for "an order
+  left the KDS queue." A screen that marks 조리완료 itself removes that
+  order immediately (the click's own `reload()`), but a second screen in
+  the same store only notices via its own 15s poll. Confirmed live on
+  2026-09-13: moving an order to `PRODUCED` from outside the UI left it
+  showing on an already-open KDS tab for up to 15s before the poll caught
+  up. Fixing it for real means Device Server pushing something on
+  `PRODUCED` to KDS too, not just to DID.
 - **No authentication**, for the same reason as sun-moon-terminal-pos:
   every order in this system is a sample by design.
 - **One item per order.** The kitchen ticket shows `menuName` as a single
