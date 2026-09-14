@@ -34,8 +34,35 @@ export interface Order {
   status: OrderStatus
   acceptedBy: string | null
   kdsDeviceId: string | null
+  /**
+   * 판매일자 — the 영업일자 that was open when the order arrived, which is
+   * not the calendar date of `placedAt`: a shop trading past midnight is
+   * still on the same business day. Null only for orders placed before
+   * 영업일 existed at all.
+   *
+   * Order has sent this since 2026-09-10; this interface did not declare
+   * it until 2026-09-15, so the kitchen screen was receiving the field
+   * and throwing it away — which is exactly why last night's unfinished
+   * tickets were still on the board this morning.
+   */
+  businessDate: string | null
   placedAt: string
   updatedAt: string
+}
+
+/** Whether this store has 개점'd, and which 판매일자 it is on. */
+export interface BusinessDayStatus {
+  storeId: string
+  open: boolean
+  businessDate?: string
+  openedBy?: string
+  needsClosing: boolean
+}
+
+export async function fetchBusinessDayStatus(storeId: string): Promise<BusinessDayStatus> {
+  const res = await fetch(`${BASE}/business-days/status?storeId=${encodeURIComponent(storeId)}`)
+  if (!res.ok) throw await failure(res)
+  return (await res.json()) as BusinessDayStatus
 }
 
 export const STATUS_LABEL: Record<OrderStatus, string> = {
